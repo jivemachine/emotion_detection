@@ -8,8 +8,8 @@ import cv2
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras.backend import set_session
-sess = tf.Session()
-graph = tf.get_default_graph()
+sess = tf.compat.v1.Session()
+graph = tf.compat.v1.get_default_graph()
 set_session(sess)
 
 face_classifier = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
@@ -28,7 +28,7 @@ class DetectEmotion(object):
         ret, frame = self.cap.read()
         labels = []
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = face_classifier.detectMultiScale(gray, 1.5, 5)
+        faces = face_classifier.detectMultiScale(gray, 1.5, 4)
 
         for (x, y, w, h) in faces:
             cv2.rectangle(frame, (x,y), (x+w, y+h), (255, 0, 0), 2)
@@ -39,14 +39,11 @@ class DetectEmotion(object):
                 roi = roi_gray.astype('float')/255.0
                 roi = img_to_array(roi)
                 roi = np.expand_dims(roi, axis=0)
-                global sess
-                global graph
-                with graph.as_default():
-                    set_session(sess)
-                    preds = classifier.predict(roi)[0]
-                    print("Get it")
-                    label = class_labels[preds.argmax()]
-                    label_position=(x,y)
+               
+                preds = classifier.predict(roi)[0]
+                print("YO!")
+                label = class_labels[preds.argmax()]
+                label_position=(x,y)
             
         
         
@@ -55,4 +52,4 @@ class DetectEmotion(object):
                 cv2.putText(frame, "No Face Found", (20,60), cv2.FONT_HERSHEY_TRIPLEX,2(0,255,0), 3)
         
         ret, jpeg = cv2.imencode('.jpg', frame)
-        return (jpg.tobytes)
+        return (jpeg.tobytes())
